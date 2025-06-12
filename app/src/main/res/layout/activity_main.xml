@@ -8,12 +8,57 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/titleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="WELCOME TO EduMap"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#DDE1EB"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="40dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/educationImage"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        android:src="@drawable/education"
+        android:contentDescription="Education Illustration"
+        app:layout_constraintTop_toBottomOf="@id/titleText"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/descriptionText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Welcome to EduMap – your smart guide to nearby schools, universities, and learning centers. Discover, explore, and connect with educational opportunities around you!"
+        android:textSize="20sp"
+        android:textColor="#49516B"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/educationImage"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp" />
+
+    <Button
+        android:id="@+id/getStartedButton"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:text="GET STARTED"
+        android:textAllCaps="true"
+        android:textColor="#fff"
+        android:background="@drawable/rounded_get_started_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="40dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
