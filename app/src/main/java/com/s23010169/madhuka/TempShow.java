@@ -19,7 +19,7 @@ public class TempShow extends AppCompatActivity implements SensorEventListener {
     
     // Constants
     private static final int TEMP_THRESHOLD = 69;
-    private static final int INITIAL_TEMP = 69;
+    private static final int INITIAL_TEMP = 25;
     private static final int MIN_TEMP = 0;
     private static final int MAX_TEMP = 100;
     private static final String TEMP_FORMAT = "%.1f°";
