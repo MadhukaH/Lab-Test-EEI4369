@@ -7,32 +7,6 @@
     android:background="#1A1A2E"
     tools:context=".TempShow">
 
-    <!-- NIGHT TIME and TEMPERATURE SETTINGS -->
-    <TextView
-        android:id="@+id/nightTimeTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="NIGHT TIME"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:layout_marginTop="32dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <TextView
-        android:id="@+id/temperatureSettingsTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TEMPERATURE SETTINGS"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="14sp"
-        android:layout_marginTop="4dp"
-        app:layout_constraintTop_toBottomOf="@+id/nightTimeTextView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <!-- Current Temp -->
     <TextView
         android:id="@+id/currentTempLabel"
@@ -40,9 +14,9 @@
         android:layout_height="wrap_content"
         android:text="CURRENT TEMP"
         android:textColor="@android:color/darker_gray"
-        android:textSize="16sp"
+        android:textSize="25sp"
         android:layout_marginTop="48dp"
-        app:layout_constraintTop_toBottomOf="@+id/temperatureSettingsTextView"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

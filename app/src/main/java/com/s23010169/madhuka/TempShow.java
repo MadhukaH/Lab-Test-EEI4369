@@ -7,8 +7,6 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class TempShow extends AppCompatActivity {
-    private TextView nightTimeTextView;
-    private TextView temperatureSettingsTextView;
     private TextView currentTempLabel;
     private TextView currentTemperatureValue;
     private Button dryButton;
@@ -26,8 +24,6 @@ public class TempShow extends AppCompatActivity {
         setContentView(R.layout.activity_temp_show);
 
         // Initialize TextViews
-        nightTimeTextView = findViewById(R.id.nightTimeTextView);
-        temperatureSettingsTextView = findViewById(R.id.temperatureSettingsTextView);
         currentTempLabel = findViewById(R.id.currentTempLabel);
         currentTemperatureValue = findViewById(R.id.currentTemperatureValue);
         sliderValue = findViewById(R.id.sliderValue);
