@@ -8,6 +8,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 import android.net.Uri;
 import android.media.MediaPlayer;
+import android.content.Intent;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText usernameInput;
@@ -39,8 +40,10 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // TODO: Implement actual login logic here
-            Toast.makeText(this, "Login clicked", Toast.LENGTH_SHORT).show();
+            // Navigate to HomeActivity
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(intent);
+            finish(); // Close the login activity
         });
     }
 
