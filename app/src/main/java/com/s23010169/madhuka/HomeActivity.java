@@ -1,6 +1,7 @@
 package com.s23010169.madhuka;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -31,6 +32,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private TextInputEditText addressInput;
     private Button showLocationButton;
+    private Button temperatureButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Initialize views
         addressInput = findViewById(R.id.addressInput);
         showLocationButton = findViewById(R.id.showLocationButton);
+        temperatureButton = findViewById(R.id.temperatureButton);
 
         // Initialize map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -56,6 +59,12 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             } else {
                 Toast.makeText(this, "Please enter an address", Toast.LENGTH_SHORT).show();
             }
+        });
+
+        // Set click listener for temperature button
+        temperatureButton.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, TempShow.class);
+            startActivity(intent);
         });
     }
 
