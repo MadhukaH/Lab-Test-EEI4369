@@ -1,65 +1,69 @@
 package com.s23010169.madhuka;
 
-import android.os.Bundle;
-import android.widget.Button;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
-import android.media.MediaPlayer;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.widget.Toast;
+import android.media.MediaPlayer;
+import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class TempShow extends AppCompatActivity implements SensorEventListener {
     private static final String TAG = "TempShow";
-    
-    // Constants
-    private static final int TEMP_THRESHOLD = 69;
-    private static final int INITIAL_TEMP = 25;
-    private static final int MIN_TEMP = 0;
-    private static final int MAX_TEMP = 100;
-    private static final String TEMP_FORMAT = "%.1f°";
-    
-    // UI Components
     private TextView currentTempLabel;
     private TextView currentTemperatureValue;
-    private TextView sliderValue;
-    private TextView minTemp;
-    private TextView maxTemp;
-    private SeekBar temperatureSlider;
     private Button dryButton;
     private Button coolButton;
     private Button fanButton;
     private Button heatButton;
+    private TextView sliderValue;
+    private TextView minTemp;
+    private TextView maxTemp;
+    private SeekBar temperatureSlider;
     
-    // System Components
-    private MediaPlayer mediaPlayer;
     private SensorManager sensorManager;
     private Sensor ambientTempSensor;
-    
-    // State Variables
-    private float currentTemperature = INITIAL_TEMP;
+    private MediaPlayer mediaPlayer;
+    private static final float TEMP_THRESHOLD = 69.0f;
     private boolean isAlarmPlaying = false;
-    private boolean isUsingSensor = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_temp_show);
-        
-        initializeComponents();
-        setupTemperatureSensor();
-        setupUI();
-    }
 
-    private void initializeComponents() {
+        // Initialize sensor manager and temperature sensor
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        ambientTempSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+        
+        if (ambientTempSensor == null) {
+            Toast.makeText(this, "Temperature sensor not available", Toast.LENGTH_LONG).show();
+        }
+
         // Initialize MediaPlayer
-        mediaPlayer = MediaPlayer.create(this, R.raw.alert_sound);
-        mediaPlayer.setLooping(true);
+        try {
+            mediaPlayer = MediaPlayer.create(this, R.raw.alarm_sound);
+            if (mediaPlayer != null) {
+                mediaPlayer.setLooping(true);
+                mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                    Log.e(TAG, "MediaPlayer error: what=" + what + " extra=" + extra);
+                    Toast.makeText(TempShow.this, "Error playing alarm sound", Toast.LENGTH_SHORT).show();
+                    return false;
+                });
+            } else {
+                Log.e(TAG, "Failed to create MediaPlayer");
+                Toast.makeText(this, "Failed to initialize alarm sound", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing MediaPlayer", e);
+            Toast.makeText(this, "Error initializing alarm sound: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
 
         // Initialize TextViews
         currentTempLabel = findViewById(R.id.currentTempLabel);
@@ -76,116 +80,45 @@ public class TempShow extends AppCompatActivity implements SensorEventListener {
 
         // Initialize SeekBar
         temperatureSlider = findViewById(R.id.temperatureSlider);
-    }
 
-    private void setupTemperatureSensor() {
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        if (sensorManager != null) {
-            ambientTempSensor = sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
-            if (ambientTempSensor != null) {
-                isUsingSensor = true;
-                Log.d(TAG, "Temperature sensor found: " + ambientTempSensor.getName());
-                showToast("Using device temperature sensor");
-            } else {
-                Log.d(TAG, "Temperature sensor not found");
-                showToast("Temperature sensor not available. Using manual control.");
-            }
-        }
-    }
-
-    private void setupUI() {
         // Set initial values
-        updateTemperatureDisplay(INITIAL_TEMP);
-        minTemp.setText(String.valueOf(MIN_TEMP));
-        maxTemp.setText(String.valueOf(MAX_TEMP));
+        currentTemperatureValue.setText("40°");
+        sliderValue.setText("40");
+        minTemp.setText("0");
+        maxTemp.setText("100");
 
         // Configure SeekBar
-        temperatureSlider.setMax(MAX_TEMP);
-        temperatureSlider.setProgress(INITIAL_TEMP);
-        temperatureSlider.setMin(MIN_TEMP);
+        temperatureSlider.setMax(100);
+        temperatureSlider.setProgress(40);
+        temperatureSlider.setMin(0);
 
-        setupButtonListeners();
-        setupSeekBarListener();
-    }
-
-    private void setupButtonListeners() {
-        Button[] modeButtons = {dryButton, coolButton, fanButton, heatButton};
-        String[] modes = {"Dry", "Cool", "Fan", "Heat"};
-
-        for (int i = 0; i < modeButtons.length; i++) {
-            final Button button = modeButtons[i];
-            final String mode = modes[i];
-            button.setOnClickListener(v -> {
-                resetButtonColors();
-                button.setBackgroundResource(R.drawable.circle_button_background_blue);
-                showToast(mode + " mode activated");
-            });
-        }
-    }
-
-    private void setupSeekBarListener() {
         temperatureSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (!isUsingSensor || fromUser) {
-                    updateTemperature(progress);
+                currentTemperatureValue.setText(progress + "°");
+                sliderValue.setText(String.valueOf(progress));
+                
+                // Check if temperature exceeds threshold
+                if (progress > TEMP_THRESHOLD && !isAlarmPlaying) {
+                    playAlarm();
+                } else if (progress <= TEMP_THRESHOLD && isAlarmPlaying) {
+                    stopAlarm();
                 }
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                if (isUsingSensor) {
-                    isUsingSensor = false;
-                    showToast("Switched to manual control");
-                }
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                // Not used
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
-    }
-
-    private void resetButtonColors() {
-        int[] buttonIds = {R.id.dryButton, R.id.coolButton, R.id.fanButton, R.id.heatButton};
-        for (int id : buttonIds) {
-            findViewById(id).setBackgroundResource(R.drawable.circle_button_background_gray);
-        }
-    }
-
-    private void updateTemperature(float temperature) {
-        currentTemperature = temperature;
-        updateTemperatureDisplay(temperature);
-        checkTemperatureThreshold(temperature);
-    }
-
-    private void updateTemperatureDisplay(float temperature) {
-        currentTemperatureValue.setText(String.format(TEMP_FORMAT, temperature));
-        sliderValue.setText(String.format("%.1f", temperature));
-    }
-
-    private void checkTemperatureThreshold(float temperature) {
-        if (temperature >= TEMP_THRESHOLD && !isAlarmPlaying) {
-            playAlarm();
-            Log.d(TAG, "Temperature threshold exceeded: " + temperature + "°");
-            showToast("Temperature warning: " + temperature + "°");
-        } else if (temperature < TEMP_THRESHOLD && isAlarmPlaying) {
-            stopAlarm();
-            Log.d(TAG, "Temperature below threshold: " + temperature + "°");
-        }
-    }
-
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (ambientTempSensor != null && isUsingSensor) {
+        if (ambientTempSensor != null) {
             sensorManager.registerListener(this, ambientTempSensor, SensorManager.SENSOR_DELAY_NORMAL);
-            Log.d(TAG, "Sensor listener registered");
         }
     }
 
@@ -193,37 +126,59 @@ public class TempShow extends AppCompatActivity implements SensorEventListener {
     protected void onPause() {
         super.onPause();
         sensorManager.unregisterListener(this);
-        Log.d(TAG, "Sensor listener unregistered");
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE && isUsingSensor) {
-            float temp = event.values[0];
-            Log.d(TAG, "Sensor temperature: " + temp + "°");
-            updateTemperature(temp);
+        if (isAlarmPlaying) {
+            stopAlarm();
         }
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        Log.d(TAG, "Sensor accuracy changed: " + accuracy);
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
+            float temperature = event.values[0];
+            currentTemperatureValue.setText(String.format("%.1f°", temperature));
+            
+            if (temperature > TEMP_THRESHOLD && !isAlarmPlaying) {
+                playAlarm();
+            } else if (temperature <= TEMP_THRESHOLD && isAlarmPlaying) {
+                stopAlarm();
+            }
+        }
     }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
     private void playAlarm() {
         if (mediaPlayer != null && !isAlarmPlaying) {
-            mediaPlayer.start();
-            isAlarmPlaying = true;
-            Log.d(TAG, "Alarm started");
+            try {
+                if (!mediaPlayer.isPlaying()) {
+                    mediaPlayer.start();
+                    isAlarmPlaying = true;
+                    Toast.makeText(this, "Temperature threshold exceeded!", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Alarm started playing");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error playing alarm", e);
+                Toast.makeText(this, "Error playing alarm: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Log.w(TAG, "Cannot play alarm: mediaPlayer=" + (mediaPlayer != null) + ", isAlarmPlaying=" + isAlarmPlaying);
         }
     }
 
     private void stopAlarm() {
         if (mediaPlayer != null && isAlarmPlaying) {
-            mediaPlayer.pause();
-            mediaPlayer.seekTo(0);
-            isAlarmPlaying = false;
-            Log.d(TAG, "Alarm stopped");
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                    mediaPlayer.seekTo(0);
+                    isAlarmPlaying = false;
+                    Log.d(TAG, "Alarm stopped");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error stopping alarm", e);
+                Toast.makeText(this, "Error stopping alarm: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -231,10 +186,16 @@ public class TempShow extends AppCompatActivity implements SensorEventListener {
     protected void onDestroy() {
         super.onDestroy();
         if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-            Log.d(TAG, "MediaPlayer released");
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
+                mediaPlayer.release();
+                mediaPlayer = null;
+                Log.d(TAG, "MediaPlayer released");
+            } catch (Exception e) {
+                Log.e(TAG, "Error releasing MediaPlayer", e);
+            }
         }
-        sensorManager.unregisterListener(this);
     }
 } 
