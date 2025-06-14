@@ -142,6 +142,17 @@
     </LinearLayout>
 
     <!-- Temperature Slider (simplified for now) -->
+    <ImageView
+        android:id="@+id/tempImage"
+        android:layout_width="450dp"
+        android:layout_height="450dp"
+        android:src="@drawable/temp"
+        android:contentDescription="Temperature Image"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toTopOf="@+id/sliderValue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <TextView
         android:id="@+id/sliderValue"
         android:layout_width="wrap_content"
