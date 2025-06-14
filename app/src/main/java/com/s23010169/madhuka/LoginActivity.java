@@ -1,20 +1,23 @@
 package com.s23010169.madhuka;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import android.widget.EditText;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.VideoView;
-import android.net.Uri;
-import android.media.MediaPlayer;
-import android.content.Intent;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class LoginActivity extends AppCompatActivity {
+
     private EditText usernameInput;
     private EditText passwordInput;
     private Button loginButton;
     private VideoView backgroundVideo;
+
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,23 +30,29 @@ public class LoginActivity extends AppCompatActivity {
         loginButton = findViewById(R.id.loginButton);
         backgroundVideo = findViewById(R.id.backgroundVideo);
 
-        // Setup video background
+        // Initialize database
+        databaseHelper = new DatabaseHelper(this);
+
         setupVideoBackground();
 
-        // Set click listener for login button
         loginButton.setOnClickListener(v -> {
             String username = usernameInput.getText().toString().trim();
             String password = passwordInput.getText().toString().trim();
 
             if (username.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please enter both fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Navigate to HomeActivity
-            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-            startActivity(intent);
-            finish(); // Close the login activity
+            // Save login info into database
+            boolean success = databaseHelper.insertData(username, password);
+            if (success) {
+                Toast.makeText(this, "Login data saved successfully", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                finish();
+            } else {
+                Toast.makeText(this, "Failed to save login data", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -53,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
         backgroundVideo.setVideoURI(uri);
         backgroundVideo.setOnPreparedListener(mp -> {
             mp.setLooping(true);
-            mp.setVolume(0f, 0f);
+            mp.setVolume(0f, 0f); // Mute
         });
         backgroundVideo.start();
     }
@@ -69,4 +78,4 @@ public class LoginActivity extends AppCompatActivity {
         super.onResume();
         backgroundVideo.start();
     }
-} 
+}
